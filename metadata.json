@@ -1,0 +1,7 @@
+{
+  "name": "VozFinance - Gestor de Gastos por Voz",
+  "description": "Uma aplicação inteligente que permite registar despesas e receitas usando a voz, processando a linguagem natural com Gemini AI.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
