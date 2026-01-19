@@ -15,6 +15,7 @@ const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastTranscript, setLastTranscript] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [isCatManagerOpen, setIsCatManagerOpen] = useState(false);
@@ -33,6 +34,14 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Auto-esconder erros após 5 segundos
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const saveTransactions = (data: Transaction[]) => {
     localStorage.setItem('voz_finance_transactions', JSON.stringify(data));
   };
@@ -48,6 +57,7 @@ const App: React.FC = () => {
     saveTransactions(updated);
     setIsFormVisible(false);
     setDraftTransaction(null);
+    setLastTranscript(null);
   };
 
   const handleDeleteTransaction = (id: string) => {
@@ -71,6 +81,7 @@ const App: React.FC = () => {
   const onVoiceResult = async (transcript: string) => {
     setIsProcessing(true);
     setError(null);
+    setLastTranscript(transcript);
     try {
       const parsed = await parseVoiceInput(transcript, categories);
       const now = new Date();
@@ -80,9 +91,11 @@ const App: React.FC = () => {
         hora: now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })
       });
       setIsFormVisible(true);
-    } catch (err) {
-      setError("Não conseguimos processar a sua voz. Tente ser mais claro.");
-    } finally { setIsProcessing(false); }
+    } catch (err: any) {
+      setError(err.message || "Não conseguimos interpretar a frase.");
+    } finally { 
+      setIsProcessing(false); 
+    }
   };
 
   return (
@@ -97,31 +110,38 @@ const App: React.FC = () => {
           </div>
           <button 
             onClick={toggleTheme}
-            className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm ml-2"
+            className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm ml-2"
           >
             {theme === 'light' ? (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
             ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M14.5 12a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M14.5 12a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>
             )}
           </button>
         </div>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           <button 
             onClick={() => setIsCatManagerOpen(true)}
-            className="px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+            className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm text-sm"
           >
             Categorias
           </button>
           <VoiceButton onResult={onVoiceResult} onError={(m) => setError(m)} isProcessing={isProcessing} />
           <button 
-            onClick={() => { setDraftTransaction(null); setIsFormVisible(!isFormVisible); }}
-            className="px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2"
+            onClick={() => { setDraftTransaction(null); setLastTranscript(null); setIsFormVisible(!isFormVisible); }}
+            className="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2 text-sm"
           >
             {isFormVisible ? 'Fechar' : 'Novo'}
           </button>
         </div>
       </header>
+
+      {lastTranscript && isProcessing && (
+        <div className="mb-8 p-6 bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/30 rounded-3xl animate-pulse">
+          <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">A analisar voz...</p>
+          <p className="text-lg font-medium italic text-indigo-900/80 dark:text-indigo-200/80">"{lastTranscript}"</p>
+        </div>
+      )}
 
       {isCatManagerOpen && (
         <CategoryManager 
@@ -133,21 +153,18 @@ const App: React.FC = () => {
       )}
 
       {error && (
-        <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl text-red-700 dark:text-red-400 text-sm font-medium flex flex-col gap-2">
+        <div className="mb-8 p-4 bg-white dark:bg-slate-900 border-l-4 border-rose-500 rounded-r-2xl shadow-md animate-in slide-in-from-left duration-300">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <span>{error}</span>
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 bg-rose-100 dark:bg-rose-900/30 rounded-lg text-rose-600 dark:text-rose-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{error}</span>
             </div>
-            <button onClick={() => setError(null)} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg">
+            <button onClick={() => setError(null)} className="text-slate-300 hover:text-slate-500 transition-colors">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
             </button>
           </div>
-          {error.includes("permissão") || error.includes("microfone") ? (
-            <div className="mt-1 pl-7 text-xs opacity-80 border-t border-red-200/50 dark:border-red-800/50 pt-2">
-              <strong>Como resolver:</strong> Clique no ícone de cadeado ou microfone no lado esquerdo da barra de endereço do seu navegador e escolha "Permitir" para o Microfone.
-            </div>
-          ) : null}
         </div>
       )}
 
@@ -157,7 +174,7 @@ const App: React.FC = () => {
             categories={categories}
             initialData={draftTransaction || undefined} 
             onSubmit={handleAddTransaction} 
-            onCancel={() => { setIsFormVisible(false); setDraftTransaction(null); }}
+            onCancel={() => { setIsFormVisible(false); setDraftTransaction(null); setLastTranscript(null); }}
           />
         </div>
       )}
@@ -167,7 +184,7 @@ const App: React.FC = () => {
       <div className="mt-12 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
         <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <h2 className="text-xl font-bold">Transações Recentes</h2>
-          <span className="text-sm text-slate-400">{transactions.length} registos</span>
+          <span className="text-sm text-slate-400 font-medium bg-slate-50 dark:bg-slate-800 px-3 py-1 rounded-full">{transactions.length} registos</span>
         </div>
         <TransactionTable transactions={transactions} onDelete={handleDeleteTransaction} />
       </div>
