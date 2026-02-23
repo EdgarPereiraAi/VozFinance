@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 import { GeminiParsedTransaction, TransactionType } from "./types";
 
 // Inicialização seguindo as diretrizes de segurança e performance
@@ -17,24 +17,16 @@ export const parseVoiceInput = async (transcript: string, categories: string[]):
   const now = new Date();
   const dateStr = now.toLocaleDateString('pt-PT');
 
-  const prompt = `Analise a seguinte transcrição de áudio em português sobre uma transação financeira.
-  Extraia os dados para um formato JSON estruturado.
-  
-  Transcrição: "${transcript}"
-  
-  Regras:
-  1. 'tipo': 'receita' (se ganhou/recebeu dinheiro) ou 'despesa' (se gastou/pagou algo).
-  2. 'valor': extraia apenas o número (ex: "15 euros" vira 15.0).
-  3. 'categoria': escolha a melhor categoria desta lista: [${categoriesStr}]. Se não houver correspondência clara, use 'Outros'.
-  4. 'descricao': resuma o que foi feito de forma curta e profissional.
-  
-  Hoje é dia ${dateStr}. Se o utilizador mencionar "ontem" ou "hoje", leve isso em conta apenas para o contexto, mas o foco é extrair o tipo, valor, categoria e descrição.`;
+  const prompt = `Extraia dados da transcrição: "${transcript}"
+Categorias: ${categoriesStr}
+Data: ${dateStr}`;
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
