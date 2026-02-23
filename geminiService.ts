@@ -3,9 +3,16 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { GeminiParsedTransaction, TransactionType } from "./types";
 
 // Inicialização seguindo as diretrizes de segurança e performance
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+const getAIInstance = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("A chave da API Gemini (VITE_GEMINI_API_KEY) não foi configurada. Por favor, adicione-a às variáveis de ambiente.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 export const parseVoiceInput = async (transcript: string, categories: string[]): Promise<GeminiParsedTransaction> => {
+  const ai = getAIInstance();
   const categoriesStr = categories.join(", ");
   const now = new Date();
   const dateStr = now.toLocaleDateString('pt-PT');
