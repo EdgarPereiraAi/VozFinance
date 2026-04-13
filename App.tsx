@@ -7,6 +7,7 @@ import TransactionTable from './components/TransactionTable';
 import TransactionForm from './components/TransactionForm';
 import VoiceButton from './components/VoiceButton';
 import CategoryManager from './components/CategoryManager';
+import Dashboard from './components/Dashboard';
 import { useTheme } from './contexts/ThemeContext';
 
 const DEFAULT_CATEGORIES = ['Alimentação', 'Transporte', 'Lazer', 'Trabalho', 'Saúde', 'Outros'];
@@ -199,6 +200,8 @@ const App: React.FC = () => {
       )}
 
       <Summary transactions={transactions} onManualEntry={handleManualEntry} />
+
+      <Dashboard transactions={transactions} />
 
       <div className="mt-12 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
         <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
