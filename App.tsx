@@ -97,6 +97,13 @@ const App: React.FC = () => {
     }
   };
 
+  const handleManualEntry = (type?: TransactionType) => {
+    setDraftTransaction(type ? { tipo: type } : null);
+    setLastTranscript(null);
+    setIsFormVisible(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 text-slate-900 dark:text-slate-100 transition-colors duration-300">
       <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-16">
@@ -129,14 +136,24 @@ const App: React.FC = () => {
             </button>
             <button 
               onClick={() => { setDraftTransaction(null); setLastTranscript(null); setIsFormVisible(!isFormVisible); }}
-              className="px-5 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
+              className={`px-5 py-3 border font-bold rounded-2xl transition-all shadow-sm flex items-center gap-2 ${isFormVisible ? 'bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'}`}
             >
-              {isFormVisible ? 'Fechar' : 'Novo'}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+              {isFormVisible ? 'Fechar' : 'Inserir Manual'}
             </button>
           </div>
           <VoiceButton onResult={onVoiceResult} onError={(m) => setError(m)} isProcessing={isProcessing} />
         </div>
       </header>
+
+      {/* Floating Action Button for Mobile/Quick Access */}
+      <button
+        onClick={() => { setDraftTransaction(null); setLastTranscript(null); setIsFormVisible(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        className="fixed bottom-8 right-8 z-50 p-5 bg-indigo-600 text-white rounded-full shadow-2xl hover:bg-indigo-700 hover:scale-110 active:scale-95 transition-all lg:hidden"
+        aria-label="Inserir Manualmente"
+      >
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
+      </button>
 
       {lastTranscript && isProcessing && (
         <div className="mb-8 p-8 bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/30 rounded-[2rem] animate-pulse">
@@ -181,7 +198,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <Summary transactions={transactions} />
+      <Summary transactions={transactions} onManualEntry={handleManualEntry} />
 
       <div className="mt-12 bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
         <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">

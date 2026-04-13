@@ -40,7 +40,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ categories, initialDa
 
   return (
     <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-lg border border-indigo-100 dark:border-indigo-900/30 animate-in fade-in slide-in-from-top-4 duration-300">
-      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6">Confirmar Detalhes</h3>
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6">
+        {initialData ? 'Confirmar Detalhes (Voz)' : 'Nova Transação Manual'}
+      </h3>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tipo</label>
