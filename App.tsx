@@ -8,6 +8,7 @@ import TransactionForm from './components/TransactionForm';
 import VoiceButton from './components/VoiceButton';
 import CategoryManager from './components/CategoryManager';
 import Dashboard from './components/Dashboard';
+import BackupManager from './components/BackupManager';
 import { useTheme } from './contexts/ThemeContext';
 
 const DEFAULT_CATEGORIES = ['Alimentação', 'Transporte', 'Lazer', 'Trabalho', 'Saúde', 'Outros'];
@@ -210,6 +211,8 @@ const App: React.FC = () => {
         </div>
         <TransactionTable transactions={transactions} onDelete={handleDeleteTransaction} />
       </div>
+
+      <BackupManager />
     </div>
   );
 };
